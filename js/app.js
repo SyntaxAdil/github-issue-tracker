@@ -2,6 +2,7 @@
 const btnGroup = document.querySelector(".btn-grp");
 const sectionContainer = document.querySelector(".sections-container");
 const issueCount = document.getElementById("issue-count");
+const userSearchInput = document.getElementById("user-search-input");
 
 const issues = {
   all: [],
@@ -135,3 +136,11 @@ function renderData(list, isLoading = false) {
 
 updateIssueCount(issues["all"]);
 // renderData(issues.all)
+userSearchInput.addEventListener("change", (e) => {
+  const searchText = e.target.value.trim();
+  if (searchText) {
+    fetchIssues(`issues/search?q=${searchText}`);
+  } else {
+    fetchIssues();
+  }
+});
