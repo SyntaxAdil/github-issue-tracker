@@ -90,7 +90,7 @@ function renderData(list, isLoading = false) {
   } else {
     parentContainer.innerHTML = list
       .map((issue) => {
-        return ` <div onclick="handlePopUp(${issue.id})" class="issue-card bg-white rounded-md border-t-3 ${issue.status === "open" ? "border-success" : "border-purple-500"} hover:-translate-y-2 transition-all duration-200 hover:shadow">
+        return ` <div onclick="handlePopUp(${issue.id})" class="shadow bg-white rounded-md border-t-3 ${issue.status === "open" ? "border-success" : "border-purple-500"} hover:-translate-y-2 transition-all duration-200 hover:shadow">
                   <div class="px-4 pt-4 h-fit">
                     <div class="flex items-center justify-between mb-3 ">
                       <img src="./assets/${issue.status}-status.png" alt="open"  />

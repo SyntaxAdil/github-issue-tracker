@@ -23,6 +23,7 @@ function handleLogin() {
     window.location.replace(("../app.html"))
   } else {
     alert("login failed");
+    
   }
 }
 
