@@ -3,11 +3,13 @@ const btnGroup = document.querySelector(".btn-grp");
 const sectionContainer = document.querySelector(".sections-container");
 const issueCount = document.getElementById("issue-count");
 const userSearchInput = document.getElementById("user-search-input");
+const popUp = document.getElementById("popup-info");
 
 const issues = {
   all: [],
   open: [],
   closed: [],
+  popUp: [],
 };
 
 btnGroup.addEventListener("click", (e) => {
@@ -51,7 +53,6 @@ async function fetchIssues(end, target) {
     console.log(error);
   }
 }
-fetchIssues();
 
 function renderData(list, isLoading = false) {
   const priorityClass = {
@@ -89,7 +90,7 @@ function renderData(list, isLoading = false) {
   } else {
     parentContainer.innerHTML = list
       .map((issue) => {
-        return ` <div class="bg-white rounded-md border-t-3 ${issue.status === "open" ? "border-success" : "border-purple-500"} hover:-translate-y-2 transition-all duration-200 hover:shadow">
+        return ` <div onclick="handlePopUp(${issue.id})" class="issue-card bg-white rounded-md border-t-3 ${issue.status === "open" ? "border-success" : "border-purple-500"} hover:-translate-y-2 transition-all duration-200 hover:shadow">
                   <div class="px-4 pt-4 h-fit">
                     <div class="flex items-center justify-between mb-3 ">
                       <img src="./assets/${issue.status}-status.png" alt="open"  />
@@ -134,8 +135,8 @@ function renderData(list, isLoading = false) {
   }
 }
 
-updateIssueCount(issues["all"]);
-// renderData(issues.all)
+// search feautures
+
 userSearchInput.addEventListener("change", (e) => {
   const searchText = e.target.value.trim();
   if (searchText) {
@@ -144,3 +145,58 @@ userSearchInput.addEventListener("change", (e) => {
     fetchIssues();
   }
 });
+function closePopUp() {
+  popUp.classList.add("hidden");
+  popUp.innerHTML = "";
+}
+async function handlePopUp(id) {
+  popUp.classList.toggle("hidden");
+  const res = await fetch(
+    `https://phi-lab-server.vercel.app/api/v1/lab/issue/${id}`,
+  );
+  const json = await res.json();
+  const data = json.data;
+
+  popUp.innerHTML = `
+    <div class="card bg-white shadow-md w-[520px] p-6 rounded-xl">
+      <h2 class="text-xl font-bold text-gray-900 mb-2">${data.title}</h2>
+      <div class="flex items-center gap-2 text-sm text-gray-500 mb-4">
+        <span class="badge badge-${data.status === "open" ? "success" : "error"} text-white text-xs font-semibold px-3 py-1 rounded-full">${data.status}</span>
+        <span>• Opened by ${data.author} • ${new Date(data.createdAt).toLocaleDateString()}</span>
+      </div>
+      <div class="flex gap-2 mb-4">
+        ${data.labels
+          .map(
+            (label) => `
+          <span class="badge badge-outline text-${label === "bug" ? "red" : label === "help wanted" ? "orange" : "green"}-500 border-${label === "bug" ? "red" : label === "help wanted" ? "orange" : "green"}-300 text-xs font-medium gap-1">${label.toUpperCase()}</span>
+        `,
+          )
+          .join("")}
+      </div>
+      <p class="text-gray-600 text-sm mb-5 leading-relaxed">${data.description}</p>
+      <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-start justify-between mb-5">
+        <div>
+          <p class="text-xs text-gray-500 mb-1">Assignee:</p>
+          <p class="text-sm font-semibold text-gray-900">${data.assignee}</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500 mb-1">Priority:</p>
+          <span class="badge badge-error text-white text-xs font-semibold px-3 py-1 rounded-full">${data.priority.toUpperCase()}</span>
+        </div>
+      </div>
+      <div class="flex justify-end">
+        <button class="btn bg-indigo-600 hover:bg-indigo-700 text-white border-none px-6 rounded-lg text-sm font-medium" onclick="closePopUp()">
+          Close
+        </button>
+      </div>
+    </div>
+  `;
+}
+popUp.addEventListener("click", (e) => {
+  if (!e.target.closest(".card")) {
+    closePopUp();
+  }
+});
+
+fetchIssues();
+updateIssueCount(issues["all"]);
