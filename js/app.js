@@ -134,9 +134,7 @@ function renderData(list, isLoading = false) {
       .join("");
   }
 }
-
 // search feautures
-
 userSearchInput.addEventListener("change", (e) => {
   const searchText = e.target.value.trim();
   if (searchText) {
@@ -177,7 +175,7 @@ async function handlePopUp(id) {
       <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-start justify-between mb-5">
         <div>
           <p class="text-xs text-gray-500 mb-1">Assignee:</p>
-          <p class="text-sm font-semibold text-gray-900">${data.assignee}</p>
+          <p class="text-sm font-semibold text-gray-900">${data.assignee  || "Assignee Not Found"}</p>
         </div>
         <div>
           <p class="text-xs text-gray-500 mb-1">Priority:</p>
@@ -197,6 +195,5 @@ popUp.addEventListener("click", (e) => {
     closePopUp();
   }
 });
-
 fetchIssues();
 updateIssueCount(issues["all"]);
