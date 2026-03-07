@@ -2,6 +2,7 @@
 const btnGroup = document.querySelector(".btn-grp");
 const sectionContainer = document.querySelector(".sections-container");
 const issueCount = document.getElementById("issue-count");
+
 const issues = {
   all: [],
   open: [],
@@ -39,22 +40,32 @@ function updateIssueCount(target) {
 }
 
 async function fetchIssues(end, target) {
-  const res = await fetch(
-    `https://phi-lab-server.vercel.app/api/v1/lab/${end || "issues/"}`,
-  );
-  const json = await res.json();
-  const data = await json.data;
-  issues.all.push(...data);
-  renderData("all", issues.all);
-  issues.open = issues.all.filter((issue) => issue.status === "open");
-  issues.closed = issues.all.filter((issue) => issue.status === "closed");
-  renderData("open", issues.open);
-  renderData("closed", issues.closed);
-  updateIssueCount(issues[target] || issues.all);
+  renderData("all", [], true);
+  renderData("open", [], true);
+  renderData("closed", [], true);
+  try {
+    const res = await fetch(
+      `https://phi-lab-server.vercel.app/api/v1/lab/${end || "issues/"}`,
+    );
+    const json = await res.json();
+    const data = json.data;
+    issues.loader = false;
+    issues.all = data;
+    renderData("all", issues.all);
+    issues.open = issues.all.filter((issue) => issue.status === "open");
+    issues.closed = issues.all.filter((issue) => issue.status === "closed");
+    renderData("open", issues.open);
+    renderData("closed", issues.closed);
+    updateIssueCount(issues[target] || issues.all);
+  } catch (error) {
+    console.log(error);
+  } finally {
+    isLoading = false;
+  }
 }
 fetchIssues();
 
-function renderData(container, target) {
+function renderData(container, target, isLoading = false) {
   const priorityClass = {
     high: "badge-error",
     medium: "badge-warning",
@@ -70,48 +81,69 @@ function renderData(container, target) {
 
   const parentContainer = document.getElementById(container);
 
-  parentContainer.innerHTML = target
-    .map((issue) => {
-      return ` <div class="bg-white rounded-md border-t-3 ${issue.status === "open" ? "border-success" : "border-purple-500"} hover:-translate-y-2 transition-all duration-200 hover:shadow">
-            <div class="px-4 pt-4 h-fit">
-              <div class="flex items-center justify-between mb-3 ">
-                <img src="./assets/${issue.status}-status.png" alt="open"  />
-                <div
-                  class="badge ${priorityClass[issue.priority]} badge-soft uppercase px-6 font-medium"
-                >
-                  ${issue.priority}
+  if (isLoading) {
+    parentContainer.innerHTML = Array(8)
+      .fill(
+        `<div class="bg-white rounded-md border-t-3 border-base-200 animate-pulse p-4">
+        <div class="skeleton h-6 w-20 mb-3"></div>
+        <div class="skeleton h-4 w-3/4 mb-2"></div>
+        <div class="skeleton h-3 w-full mb-1"></div>
+        <div class="skeleton h-3 w-5/6 mb-3"></div>
+        <div class="flex gap-2">
+          <div class="skeleton h-5 w-16 rounded-full"></div>
+          <div class="skeleton h-5 w-20 rounded-full"></div>
+        </div>
+      </div>`,
+      )
+      .join("");
+
+    return;
+  } else {
+    parentContainer.innerHTML = target
+      .map((issue) => {
+        return ` <div class="bg-white rounded-md border-t-3 ${issue.status === "open" ? "border-success" : "border-purple-500"} hover:-translate-y-2 transition-all duration-200 hover:shadow">
+                  <div class="px-4 pt-4 h-fit">
+                    <div class="flex items-center justify-between mb-3 ">
+                      <img src="./assets/${issue.status}-status.png" alt="open"  />
+                      <div
+                        class="badge ${priorityClass[issue.priority]} badge-soft uppercase px-6 font-medium"
+                      >
+                        ${issue.priority}
+                      </div>
+                    </div>
+                    <h2 class="text-sm font-semibold text-black">
+                      ${issue.title}
+                    </h2>
+                    <p class="my-2 text-[12px] text-[#64748b]">
+                      ${issue.description}
+                    </p>
+                    <!-- badges -->   
+                    <div class="my-3 flex gap-2 flex-wrap">
+                       ${issue.labels
+                         .map(
+                           (label) =>
+                             `<div class="badge w-fit ${labelsWithClass[label] || "bg-fuchsia-50 border-fuchsia-400"} badge-soft px-2 font-semibold uppercase  rounded-full">
+      
+                        <img src="./assets/${label}.png" class="w-3 h-3" />
+                        <span class="-ms-1">${label}</span>
+                      </div>`,
+                         )
+                         .join("")}
+                    </div>
+                  </div>
+                  <div class="divider my-0"></div>
+      
+                  <div class="px-4 pb-4 pt-2 ">
+                      <p class="text-[#64748b] text-[12px]">#${issue.author}</p>
+                      <p class="text-[#64748b] text-[12px]">${new Date(issue.createdAt).toLocaleDateString()}</p>
+                  </div>
                 </div>
-              </div>
-              <h2 class="text-sm font-semibold text-black">
-                ${issue.title}
-              </h2>
-              <p class="my-2 text-[12px] text-[#64748b]">
-                ${issue.description}
-              </p>
-              <!-- badges -->   
-              <div class="my-3 flex gap-2 flex-wrap">
-                 ${issue.labels.map(
-                   (label) =>
-                     `<div class="badge w-fit ${labelsWithClass[label] || "bg-fuchsia-50 border-fuchsia-400"} badge-soft px-2 font-semibold uppercase  rounded-full">
-
-                  <img src="./assets/${label}.png" class="w-3 h-3" />
-                  <span class="-ms-1">${label}</span>
-                </div>`,
-                 ).join("")}
-              </div>
-            </div>
-            <div class="divider my-0"></div>
-
-            <div class="px-4 pb-4 pt-2 ">
-                <p class="text-[#64748b] text-[12px]">#${issue.author}</p>
-                <p class="text-[#64748b] text-[12px]">${issue.createdAt}</p>
-            </div>
-          </div>
-
-
-`;
-    })
-    .join("");
+      
+      
+      `;
+      })
+      .join("");
+  }
 }
 
 updateIssueCount(issues["all"]);
