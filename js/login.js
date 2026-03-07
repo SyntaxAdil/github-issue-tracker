@@ -19,8 +19,8 @@ function handleLogin() {
     passVal === demoCredentials.password
   ) {
     alert("login successfull");
-    // window.location.assign(("../app.html"))
-    window.location.replace(("../app.html"))
+    window.location.assign(("../app.html"))
+    // window.location.replace(("../app.html"))
   } else {
     alert("login failed");
   }
