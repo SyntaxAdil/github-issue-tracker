@@ -12,6 +12,19 @@ const issues = {
   popUp: [],
 };
 
+const priorityClass = {
+  high: "badge-error",
+  medium: "badge-warning",
+  low: "badge-info",
+};
+
+const labelsWithClass = {
+  bug: "badge-error border-error",
+  "help wanted": "badge-warning border-warning",
+  enhancement: "badge-success border-success",
+  "good first issue": "badge-secondary border-secondary",
+  documentation: "badge-info border-info",
+};
 btnGroup.addEventListener("click", (e) => {
   const btn = e.target.closest(".btn");
   if (!btn) return;
@@ -55,19 +68,6 @@ async function fetchIssues(end, target) {
 }
 
 function renderData(list, isLoading = false) {
-  const priorityClass = {
-    high: "badge-error",
-    medium: "badge-warning",
-    low: "badge-ghost",
-  };
-  const labelsWithClass = {
-    bug: "badge-error border-error",
-    "help wanted": "badge-warning border-warning",
-    enhancement: "badge-success border-success",
-    "good first issue": "badge-secondary border-secondary",
-    documentation: "badge-info border-info",
-  };
-
   const parentContainer = document.getElementById("all");
 
   if (isLoading) {
@@ -123,7 +123,7 @@ function renderData(list, isLoading = false) {
                   <div class="divider my-0"></div>
       
                   <div class="px-4 pb-4 pt-2 ">
-                      <p class="text-[#64748b] text-[12px]">#${issue.author}</p>
+                      <p class="text-[#64748b] text-[12px]"># ${issue.id} ${issue.author}</p>
                       <p class="text-[#64748b] text-[12px]">${new Date(issue.createdAt).toLocaleDateString()}</p>
                   </div>
                 </div>
@@ -175,11 +175,11 @@ async function handlePopUp(id) {
       <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-start justify-between mb-5">
         <div>
           <p class="text-xs text-gray-500 mb-1">Assignee:</p>
-          <p class="text-sm font-semibold text-gray-900">${data.assignee  || "Assignee Not Found"}</p>
+          <p class="text-sm font-semibold text-gray-900"> ${data.assignee || "Assignee Not Found"}</p>
         </div>
         <div>
           <p class="text-xs text-gray-500 mb-1">Priority:</p>
-          <span class="badge badge-error text-white text-xs font-semibold px-3 py-1 rounded-full">${data.priority.toUpperCase()}</span>
+          <span class="badge  ${priorityClass[data.priority]} text-white text-xs font-semibold px-3 py-1 rounded-full">${data.priority.toUpperCase()}</span>
         </div>
       </div>
       <div class="flex justify-end">
