@@ -18,15 +18,8 @@ btnGroup.addEventListener("click", (e) => {
     btn.classList.remove("filter_btn_active");
   }
   btn.classList.add("filter_btn_active");
-  for (let section of sectionContainer.children) {
-    section.classList.add("hidden");
-  }
-
-  const targetId = document.getElementById(target);
-  if (targetId) {
-    targetId.classList.remove("hidden");
-    updateIssueCount(issues[target]);
-  }
+  renderData(issues[target]);
+  updateIssueCount(issues[target]);
 });
 
 // functions
@@ -40,9 +33,7 @@ function updateIssueCount(target) {
 }
 
 async function fetchIssues(end, target) {
-  renderData("all", [], true);
-  renderData("open", [], true);
-  renderData("closed", [], true);
+  renderData([], true);
   try {
     const res = await fetch(
       `https://phi-lab-server.vercel.app/api/v1/lab/${end || "issues/"}`,
@@ -51,21 +42,17 @@ async function fetchIssues(end, target) {
     const data = json.data;
     issues.loader = false;
     issues.all = data;
-    renderData("all", issues.all);
     issues.open = issues.all.filter((issue) => issue.status === "open");
     issues.closed = issues.all.filter((issue) => issue.status === "closed");
-    renderData("open", issues.open);
-    renderData("closed", issues.closed);
+    renderData(issues[target] || issues.all);
     updateIssueCount(issues[target] || issues.all);
   } catch (error) {
     console.log(error);
-  } finally {
-    isLoading = false;
   }
 }
 fetchIssues();
 
-function renderData(container, target, isLoading = false) {
+function renderData(list, isLoading = false) {
   const priorityClass = {
     high: "badge-error",
     medium: "badge-warning",
@@ -79,7 +66,7 @@ function renderData(container, target, isLoading = false) {
     documentation: "badge-info border-info",
   };
 
-  const parentContainer = document.getElementById(container);
+  const parentContainer = document.getElementById("all");
 
   if (isLoading) {
     parentContainer.innerHTML = Array(8)
@@ -99,7 +86,7 @@ function renderData(container, target, isLoading = false) {
 
     return;
   } else {
-    parentContainer.innerHTML = target
+    parentContainer.innerHTML = list
       .map((issue) => {
         return ` <div class="bg-white rounded-md border-t-3 ${issue.status === "open" ? "border-success" : "border-purple-500"} hover:-translate-y-2 transition-all duration-200 hover:shadow">
                   <div class="px-4 pt-4 h-fit">
@@ -147,3 +134,4 @@ function renderData(container, target, isLoading = false) {
 }
 
 updateIssueCount(issues["all"]);
+// renderData(issues.all)
