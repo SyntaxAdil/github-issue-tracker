@@ -135,13 +135,17 @@ function renderData(list, isLoading = false) {
   }
 }
 // search feautures
-userSearchInput.addEventListener("change", (e) => {
-  const searchText = e.target.value.trim();
-  if (searchText) {
-    fetchIssues(`issues/search?q=${searchText}`);
-  } else {
-    fetchIssues();
-  }
+let timeout;
+userSearchInput.addEventListener("input", (e) => {
+  clearTimeout(timeout);
+  timeout = setTimeout(() => {
+    const searchText = e.target.value.trim();
+    if (searchText) {
+      fetchIssues(`issues/search?q=${searchText}`);
+    } else {
+      fetchIssues();
+    }
+  }, 800);
 });
 function closePopUp() {
   popUp.classList.add("hidden");
