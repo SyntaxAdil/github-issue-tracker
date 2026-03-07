@@ -57,14 +57,20 @@
           </h2>
         </div>
         <div class="flex gap-4">
-          <label class="input outline-0">
+          <label class="input outline-0 relative">
             <i class="fa-solid fa-magnifying-glass text-[#64748b]"></i>
+
             <input
               type="search"
               id="user-search-input"
               class="grow text-[#64748b]"
               placeholder="Search issues..."
             />
+
+            <ul
+              id="search-result-container"
+              class="absolute hidden top-full left-0 w-full p-2 bg-white z-10 shadow max-h-60 space-y-2 overflow-y-auto mt-1"
+            ></ul>
           </label>
           <button class="btn bg-[#4a00ff] text-white" type="button">
             <i class="fas fa-plus"></i>

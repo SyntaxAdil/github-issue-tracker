@@ -4,6 +4,9 @@ const sectionContainer = document.querySelector(".sections-container");
 const issueCount = document.getElementById("issue-count");
 const userSearchInput = document.getElementById("user-search-input");
 const popUp = document.getElementById("popup-info");
+const searchResultContainer = document.getElementById(
+  "search-result-container",
+);
 
 const issues = {
   all: [],
@@ -62,6 +65,7 @@ async function fetchIssues(end, target) {
     issues.closed = issues.all.filter((issue) => issue.status === "closed");
     renderData(issues[target] || issues.all);
     updateIssueCount(issues[target] || issues.all);
+    return json.data;
   } catch (error) {
     console.log(error);
   }
@@ -138,15 +142,40 @@ function renderData(list, isLoading = false) {
 let timeout;
 userSearchInput.addEventListener("input", (e) => {
   clearTimeout(timeout);
+  const searchText = e.target.value.trim();
+
   timeout = setTimeout(() => {
-    const searchText = e.target.value.trim();
     if (searchText) {
-      fetchIssues(`issues/search?q=${searchText}`);
+      searchResultContainer.classList.remove("hidden");
+
+      fetchIssues(`issues/search?q=${searchText}`).then((data) => {
+        if (data.length === 0) {
+          searchResultContainer.innerHTML = `<p class="text-red-400 text-center text-sm" >Issue not found!!</p>`;
+          return;
+        }
+
+        searchResultContainer.innerHTML = data
+          .map(
+            (i) =>
+              ` <li class="text-[12px] truncate hover:text-blue-400">
+              <i class="fa-solid fa-magnifying-glass text-[#64748b82]"></i>
+              ${i.title}
+            </li>
+          `,
+          )
+          .join("");
+      });
     } else {
+      searchResultContainer.classList.add("hidden");
+
       fetchIssues();
     }
-  }, 800);
+  }, 100);
 });
+userSearchInput.addEventListener("blur", () => {
+  searchResultContainer.classList.add("hidden");
+});
+
 function closePopUp() {
   popUp.classList.add("hidden");
   popUp.innerHTML = "";
