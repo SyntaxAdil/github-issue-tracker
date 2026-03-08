@@ -97,7 +97,7 @@ function renderData(list, isLoading = false) {
         return ` <div onclick="handlePopUp(${issue.id})" class="shadow bg-white rounded-md border-t-3 ${issue.status === "open" ? "border-success" : "border-purple-500"} hover:-translate-y-2 transition-all duration-200 hover:shadow">
                   <div class="px-4 pt-4 h-fit">
                     <div class="flex items-center justify-between mb-3 ">
-                      <img src="./assets/${issue.status}-status.png" alt="open"  />
+                      <img src="./assets/${issue.status}-status.png" />
                       <div
                         class="badge ${priorityClass[issue.priority]} badge-soft uppercase px-6 font-medium"
                       >
@@ -199,7 +199,10 @@ async function handlePopUp(id) {
         ${data.labels
           .map(
             (label) => `
-          <span class="badge badge-outline text-${label === "bug" ? "red" : label === "help wanted" ? "orange" : "green"}-500 border-${label === "bug" ? "red" : label === "help wanted" ? "orange" : "green"}-300 text-xs font-medium gap-1">${label.toUpperCase()}</span>
+          <span class="badge badge-outline text-${label === "bug" ? "red" : label === "help wanted" ? "orange" : "green"}-500 border-${label === "bug" ? "red" : label === "help wanted" ? "orange" : "green"}-300 text-xs font-medium gap-1">
+           <img src="./assets/${label}.png" class="w-3 h-3" />
+          ${label.toUpperCase()}
+          </span>
         `,
           )
           .join("")}
